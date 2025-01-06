@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotell.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250103182939_SeedData")]
-    partial class SeedData
+    [Migration("20250106155325_intial migration")]
+    partial class intialmigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -51,6 +51,8 @@ namespace BookingHotell.Migrations
                     b.HasKey("BookingId");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("RoomId");
 
                     b.ToTable("Bookings");
                 });
@@ -192,9 +194,20 @@ namespace BookingHotell.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("BookingHotell.Models.Room", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BookingHotell.Models.Customer", b =>
+                {
+                    b.Navigation("Bookings");
+                });
+
+            modelBuilder.Entity("BookingHotell.Models.Room", b =>
                 {
                     b.Navigation("Bookings");
                 });

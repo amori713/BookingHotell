@@ -14,5 +14,7 @@ namespace BookingHotell.Models
         public decimal PricePerNight { get; set; }
         public bool HasExtraBedOption { get; set; }  
         public int ExtraBedsAvailable { get; set; }
+
+        public ICollection<Booking> Bookings { get; set; }
     }
 }

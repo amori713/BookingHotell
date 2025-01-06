@@ -49,6 +49,8 @@ namespace BookingHotell.Migrations
 
                     b.HasIndex("CustomerId");
 
+                    b.HasIndex("RoomId");
+
                     b.ToTable("Bookings");
                 });
 
@@ -189,9 +191,20 @@ namespace BookingHotell.Migrations
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("BookingHotell.Models.Room", null)
+                        .WithMany("Bookings")
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("BookingHotell.Models.Customer", b =>
+                {
+                    b.Navigation("Bookings");
+                });
+
+            modelBuilder.Entity("BookingHotell.Models.Room", b =>
                 {
                     b.Navigation("Bookings");
                 });
