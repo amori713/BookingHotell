@@ -162,13 +162,24 @@ namespace BookingHotell
                 return;
             }
 
+            bool isRoomBooked = dbContext.Bookings.Any(b =>
+                b.RoomId == roomId &&
+                ((startDate >= b.StartDate && startDate < b.EndDate) ||
+                 (endDate > b.StartDate && endDate <= b.EndDate) ||
+                 (startDate <= b.StartDate && endDate >= b.EndDate)));
+
+            if (isRoomBooked)
+            {
+                Console.WriteLine("Rummet är redan bokat under den valda perioden.");
+                return;
+            }
+
             int extraBeds = 0;
             if (room.HasExtraBedOption)
             {
                 Console.Write($"Rummet har {room.ExtraBedsAvailable} extrasängar tillgängliga. Hur många extra sängar vill du lägga till? ");
                 extraBeds = int.Parse(Console.ReadLine());
 
-                
                 if (extraBeds > room.ExtraBedsAvailable)
                 {
                     Console.WriteLine($"Maximalt antal extrasängar som kan läggas till är {room.ExtraBedsAvailable}.");
@@ -182,7 +193,7 @@ namespace BookingHotell
                 RoomId = roomId,
                 StartDate = startDate,
                 EndDate = endDate,
-                ExtraBeds = extraBeds  
+                ExtraBeds = extraBeds
             };
 
             dbContext.Bookings.Add(booking);
