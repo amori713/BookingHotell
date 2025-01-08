@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using System.Text.RegularExpressions;
 
 namespace BookingHotell
 {
@@ -11,19 +12,17 @@ namespace BookingHotell
         {
 
             var builder = new ConfigurationBuilder()
-                 .SetBasePath(Directory.GetCurrentDirectory()) 
-                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true); 
+                 .SetBasePath(Directory.GetCurrentDirectory())
+                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            var config = builder.Build(); 
+            var config = builder.Build();
 
-            var connectionString = config.GetConnectionString("DefaultConnection"); 
+            var connectionString = config.GetConnectionString("DefaultConnection");
 
-            
             var options = new DbContextOptionsBuilder<ApplicationDbContext>()
                 .UseSqlServer(connectionString)
                 .Options;
 
-            
             using (var dbContext = new ApplicationDbContext(options))
             {
                 dbContext.Database.Migrate();
@@ -31,10 +30,8 @@ namespace BookingHotell
 
             Console.WriteLine("Database has been created!");
 
-            
             SeedData(options);
 
-            
             RunMenu(options);
         }
 
@@ -42,7 +39,6 @@ namespace BookingHotell
         {
             using var dbContext = new ApplicationDbContext(options);
 
-            
             if (!dbContext.Rooms.Any())
             {
                 dbContext.Rooms.AddRange(
@@ -54,7 +50,6 @@ namespace BookingHotell
                 dbContext.SaveChanges();
             }
 
-           
             if (!dbContext.Customers.Any())
             {
                 dbContext.Customers.AddRange(
@@ -71,18 +66,20 @@ namespace BookingHotell
         {
             while (true)
             {
+                Console.Clear();
                 Console.WriteLine("\nVälkommen till HotellBokningsappen!");
                 Console.WriteLine("1. Visa rum");
                 Console.WriteLine("2. Lägg till en bokning");
                 Console.WriteLine("3. Visa kunder");
-                Console.WriteLine("4. Registrera ett rum");
-                Console.WriteLine("5. Ändra ett rum");
-                Console.WriteLine("6. Registrera en kund");
-                Console.WriteLine("7. Ändra en kund");
-                Console.WriteLine("8. Ta bort ett rum");
-                Console.WriteLine("9. Ta bort en bokning");
-                Console.WriteLine("10. Ta bort en kund");
-                Console.WriteLine("11. Avsluta");
+                Console.WriteLine("4. Visa bokningar");
+                Console.WriteLine("5. Registrera ett rum");
+                Console.WriteLine("6. Ändra ett rum");
+                Console.WriteLine("7. Registrera en kund");
+                Console.WriteLine("8. Ändra en kund");
+                Console.WriteLine("9. Ta bort ett rum");
+                Console.WriteLine("10. Ta bort en bokning");
+                Console.WriteLine("11. Ta bort en kund");
+                Console.WriteLine("12. Avsluta");
                 Console.Write("Välj ett alternativ: ");
 
                 var choice = Console.ReadLine();
@@ -99,27 +96,30 @@ namespace BookingHotell
                         ShowCustomers(options);
                         break;
                     case "4":
-                        RegisterRoom(options);
+                        ShowBookings(options);
                         break;
                     case "5":
-                        EditRoom(options);
+                        RegisterRoom(options);
                         break;
                     case "6":
-                        RegisterCustomer(options);
+                        EditRoom(options);
                         break;
                     case "7":
-                        EditCustomer(options);
+                        RegisterCustomer(options);
                         break;
                     case "8":
-                        DeleteRoom(options);
+                        EditCustomer(options);
                         break;
                     case "9":
-                        DeleteBooking(options);
+                        DeleteRoom(options);
                         break;
                     case "10":
-                        DeleteCustomer(options);
+                        DeleteBooking(options);
                         break;
                     case "11":
+                        DeleteCustomer(options);
+                        break;
+                    case "12":
                         Console.WriteLine("Avslutar programmet...");
                         return;
                     default:
@@ -132,14 +132,40 @@ namespace BookingHotell
         static void ShowRooms(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
-            var rooms = dbContext.Rooms.ToList();
+            var rooms = dbContext.Rooms.OrderBy(r => r.RoomId).ToList();
 
             Console.WriteLine("\nTillgängliga rum:");
+            int roomNumber = 1;  
             foreach (var room in rooms)
             {
-                Console.WriteLine($"Rum ID: {room.RoomId}, Typ: {room.RoomType}, Kapacitet: {room.Capacity}, Pris/Natt: {room.PricePerNight}, Extrasäng: {(room.HasExtraBedOption ? "Ja" : "Nej")}");
+                Console.WriteLine($"Rum {roomNumber}, Typ: {room.RoomType}, Kapacitet: {room.Capacity}, Pris/Natt: {room.PricePerNight:C}, Extrasäng: {(room.HasExtraBedOption ? "Ja" : "Nej")}");
+                roomNumber++;  
             }
+            Console.ReadLine();
         }
+
+        static void ShowBookings(DbContextOptions<ApplicationDbContext> options)
+        {
+            using var dbContext = new ApplicationDbContext(options);
+            var rooms = dbContext.Rooms.OrderBy(r => r.RoomId).ToList();
+            var bookings = dbContext.Bookings.Include(b => b.Room).Include(b => b.Customer).ToList();
+
+            if (bookings.Any())
+            {
+                Console.WriteLine("\nBokningar:");
+                foreach (var booking in bookings)
+                {
+                    int roomNumber = rooms.FindIndex(r => r.RoomId == booking.RoomId) + 1;
+                    Console.WriteLine($"Bokning ID: {booking.BookingId}, Kund: {booking.Customer.FirstName} {booking.Customer.LastName}, Rum: rum{roomNumber}, Typ: {booking.Room.RoomType}, Startdatum: {booking.StartDate:yyyy-MM-dd}, Slutdatum: {booking.EndDate:yyyy-MM-dd}");
+                }
+            }
+            else
+            {
+                Console.WriteLine("\nInga bokningar finns.");
+            }
+            Console.ReadLine();
+        }
+
 
         static void AddBooking(DbContextOptions<ApplicationDbContext> options)
         {
@@ -149,10 +175,40 @@ namespace BookingHotell
             int customerId = int.Parse(Console.ReadLine());
             Console.Write("Ange Rummets ID: ");
             int roomId = int.Parse(Console.ReadLine());
-            Console.Write("Ange Startdatum (yyyy-mm-dd): ");
-            DateTime startDate = DateTime.Parse(Console.ReadLine());
-            Console.Write("Ange Slutdatum (yyyy-mm-dd): ");
-            DateTime endDate = DateTime.Parse(Console.ReadLine());
+
+            DateTime startDate;
+            while (true)
+            {
+                Console.Write("Ange Startdatum (yyyy-mm-dd): ");
+                if (DateTime.TryParse(Console.ReadLine(), out startDate))
+                {
+                    break; 
+                }
+                else
+                {
+                    Console.WriteLine("Ogiltigt datumformat. Försök igen.");
+                }
+            }
+
+            DateTime endDate;
+            while (true)
+            {
+                Console.Write("Ange Slutdatum (yyyy-mm-dd): ");
+                if (DateTime.TryParse(Console.ReadLine(), out endDate))
+                {
+                    break; 
+                }
+                else
+                {
+                    Console.WriteLine("Ogiltigt datumformat. Försök igen.");
+                }
+            }
+
+            if (startDate >= endDate)
+            {
+                Console.WriteLine("Slutdatum måste vara senare än startdatum.");
+                return;
+            }
 
             var room = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
 
@@ -209,34 +265,52 @@ namespace BookingHotell
             Console.WriteLine("\nRegistrerade kunder:");
             foreach (var customer in customers)
             {
-                Console.WriteLine($"Kund ID: {customer.CustomerId}, Namn: {customer.FirstName} {customer.LastName}, Telefon: {customer.PhoneNumber}, E-post: {customer.Email}");
+                
+                Console.WriteLine($"Kund ID{customer.CustomerId}, Namn: {customer.FirstName} {customer.LastName}, Telefon: {customer.PhoneNumber}, E-post: {customer.Email}");
+            }
+
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+            if (choice?.ToLower() == "m")
+            {
+                return; 
             }
         }
 
         static void RegisterRoom(DbContextOptions<ApplicationDbContext> options)
         {
-            using var dbContext = new ApplicationDbContext(options);
-
-            Console.Write("Ange rumstyp (Single/Double): ");
-            var roomType = Console.ReadLine();
-            Console.Write("Ange kapacitet: ");
-            int capacity = int.Parse(Console.ReadLine());
-            Console.Write("Ange pris per natt: ");
-            decimal pricePerNight = decimal.Parse(Console.ReadLine());
-            Console.Write("Har rummet extrasängar? (ja/nej): ");
-            bool hasExtraBedOption = Console.ReadLine().ToLower() == "ja";
-
-            var room = new Room
+            while (true) 
             {
-                RoomType = roomType,
-                Capacity = capacity,
-                PricePerNight = pricePerNight,
-                HasExtraBedOption = hasExtraBedOption
-            };
+                using var dbContext = new ApplicationDbContext(options);
 
-            dbContext.Rooms.Add(room);
-            dbContext.SaveChanges();
-            Console.WriteLine("Rummet har registrerats!");
+                Console.Write("Ange rumstyp (Single/Double): ");
+                var roomType = Console.ReadLine();
+                Console.Write("Ange kapacitet: ");
+                int capacity = int.Parse(Console.ReadLine());
+                Console.Write("Ange pris per natt: ");
+                decimal pricePerNight = decimal.Parse(Console.ReadLine());
+                Console.Write("Har rummet extrasängar? (ja/nej): ");
+                bool hasExtraBedOption = Console.ReadLine().ToLower() == "ja";
+
+                var room = new Room
+                {
+                    RoomType = roomType,
+                    Capacity = capacity,
+                    PricePerNight = pricePerNight,
+                    HasExtraBedOption = hasExtraBedOption
+                };
+
+                dbContext.Rooms.Add(room);
+                dbContext.SaveChanges();
+                Console.WriteLine("Rummet har registrerats!");
+
+                Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+                string choice = Console.ReadLine();
+                if (choice?.ToLower() == "m")
+                {
+                    break; 
+                }
+            }
         }
 
         static void EditRoom(DbContextOptions<ApplicationDbContext> options)
@@ -264,6 +338,9 @@ namespace BookingHotell
 
             dbContext.SaveChanges();
             Console.WriteLine("Rummet har uppdaterats!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+           
         }
 
         static void DeleteRoom(DbContextOptions<ApplicationDbContext> options)
@@ -283,6 +360,9 @@ namespace BookingHotell
             dbContext.Rooms.Remove(room);
             dbContext.SaveChanges();
             Console.WriteLine("Rummet har tagits bort!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+           
         }
 
         static void DeleteBooking(DbContextOptions<ApplicationDbContext> options)
@@ -302,6 +382,9 @@ namespace BookingHotell
             dbContext.Bookings.Remove(booking);
             dbContext.SaveChanges();
             Console.WriteLine("Bokningen har tagits bort!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+            
         }
 
         static void DeleteCustomer(DbContextOptions<ApplicationDbContext> options)
@@ -321,6 +404,9 @@ namespace BookingHotell
             dbContext.Customers.Remove(customer);
             dbContext.SaveChanges();
             Console.WriteLine("Kunden har tagits bort!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+           
         }
 
         static void RegisterCustomer(DbContextOptions<ApplicationDbContext> options)
@@ -329,12 +415,33 @@ namespace BookingHotell
 
             Console.Write("Förnamn: ");
             var firstName = Console.ReadLine();
+            while (string.IsNullOrEmpty(firstName)) 
+            {
+                Console.Write("Förnamn kan inte vara tomt. Ange förnamn: ");
+                firstName = Console.ReadLine();
+            }
+
             Console.Write("Efternamn: ");
             var lastName = Console.ReadLine();
-            Console.Write("Telefonnummer: ");
-            var phoneNumber = Console.ReadLine();
-            Console.Write("E-post: ");
-            var email = Console.ReadLine();
+            while (string.IsNullOrEmpty(lastName)) 
+            {
+                Console.Write("Efternamn kan inte vara tomt. Ange efternamn: ");
+                lastName = Console.ReadLine();
+            }
+
+            string phoneNumber;
+            do
+            {
+                Console.Write("Telefonnummer (endast siffror): ");
+                phoneNumber = Console.ReadLine();
+            } while (!Regex.IsMatch(phoneNumber, @"^\d{7,15}$")); 
+
+            string email;
+            do
+            {
+                Console.Write("E-post: ");
+                email = Console.ReadLine();
+            } while (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$")); 
 
             var customer = new Customer
             {
@@ -347,8 +454,13 @@ namespace BookingHotell
             dbContext.Customers.Add(customer);
             dbContext.SaveChanges();
             Console.WriteLine("Kunden har registrerats!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+            if (choice?.ToLower() == "m")
+            {
+                return;
+            }
         }
-
         static void EditCustomer(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
@@ -364,19 +476,44 @@ namespace BookingHotell
             }
 
             Console.Write($"Nuvarande förnamn ({customer.FirstName}): ");
-            customer.FirstName = Console.ReadLine();
+            string firstName = Console.ReadLine();
+            if (!string.IsNullOrEmpty(firstName))
+            {
+                customer.FirstName = firstName;
+            }
+
             Console.Write($"Nuvarande efternamn ({customer.LastName}): ");
-            customer.LastName = Console.ReadLine();
+            string lastName = Console.ReadLine();
+            if (!string.IsNullOrEmpty(lastName))
+            {
+                customer.LastName = lastName;
+            }
+
             Console.Write($"Nuvarande telefonnummer ({customer.PhoneNumber}): ");
-            customer.PhoneNumber = Console.ReadLine();
+            string phoneNumber = Console.ReadLine();
+            if (!string.IsNullOrEmpty(phoneNumber))
+            {
+                customer.PhoneNumber = phoneNumber;
+            }
+
             Console.Write($"Nuvarande e-post ({customer.Email}): ");
-            customer.Email = Console.ReadLine();
+            string email = Console.ReadLine();
+            if (!string.IsNullOrEmpty(email))
+            {
+                customer.Email = email;
+            }
 
             dbContext.SaveChanges();
-            Console.WriteLine("Kunden har uppdaterats!");
+            Console.WriteLine("Kundens information har uppdaterats!");
+            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
+            string choice = Console.ReadLine();
+            
         }
+
+
     }
- }
+}
+ 
 
   
 
