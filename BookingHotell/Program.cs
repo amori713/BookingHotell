@@ -243,9 +243,6 @@ namespace BookingHotell
             Console.WriteLine("\nTryck Enter för att återgå till föregående meny.");
             Console.ReadLine();
         }
-
-        // Apply similar input handling patterns to AddBooking, RegisterRoom, and other methods
-
         static void ShowBookings(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
@@ -290,7 +287,6 @@ namespace BookingHotell
                     return;
                 }
 
-                // Hämta alla tillgängliga rum
                 Console.WriteLine("Tillgängliga rum:");
                 var availableRooms = dbContext.Rooms.ToList();
                 if (availableRooms.Count == 0)
@@ -298,22 +294,16 @@ namespace BookingHotell
                     Console.WriteLine("Inga tillgängliga rum.");
                     return;
                 }
-
-                // Visa alla tillgängliga rum
                 foreach (var room in availableRooms)
                 {
                     Console.WriteLine($"Rum ID: {room.RoomId}, Typ: {room.RoomType}, Kapacitet: {room.Capacity}, Pris per natt: {room.PricePerNight}");
                 }
-
-                // Be användaren om rum-ID utan negativt tecken
                 Console.Write("Ange Rummets ID för bokning (skriv t.ex. -2 för rum 2): ");
                 if (!int.TryParse(Console.ReadLine(), out int roomId))
                 {
                     Console.WriteLine("Ogiltigt rum-ID.");
                     return;
                 }
-
-                // Kontrollera att det negativa talet matchar rätt rum-ID
                 if (roomId >= 0)
                 {
                     Console.WriteLine("Rum-ID måste vara negativt, t.ex. -2 för rum 2.");
@@ -326,8 +316,6 @@ namespace BookingHotell
                     Console.WriteLine("Rummet finns inte.");
                     return;
                 }
-
-                // Fråga om extra säng om det är ett dubbelrum
                 int extraBeds = 0;
                 if (roomToBook.RoomType == RoomType.Double && roomToBook.HasExtraBedOption)
                 {
@@ -366,7 +354,7 @@ namespace BookingHotell
                         Console.WriteLine("Ogiltigt datumformat eller slutdatum är före startdatum. Försök igen.");
                 }
 
-                // Kontrollera om rummet redan är bokat
+               
                 bool isRoomBooked = dbContext.Bookings.Any(b => b.RoomId == roomToBook.RoomId &&
                     ((startDate >= b.StartDate && startDate < b.EndDate) ||
                      (endDate > b.StartDate && endDate <= b.EndDate) ||
@@ -378,7 +366,7 @@ namespace BookingHotell
                     return;
                 }
 
-                // Skapa bokning
+               
                 var booking = new Booking
                 {
                     CustomerId = customerId,
@@ -430,16 +418,16 @@ namespace BookingHotell
                 Console.Write("Ange rumstyp (Single/Double): ");
                 var roomTypeInput = Console.ReadLine();
 
-                // Försök att konvertera användarens input till RoomType enum
+                
                 RoomType roomType;
                 if (Enum.TryParse(roomTypeInput, true, out roomType) && Enum.IsDefined(typeof(RoomType), roomType))
                 {
-                    // Om det är en giltig enum
+                    
                 }
                 else
                 {
                     Console.WriteLine("Ogiltig rumstyp. Försök igen.");
-                    continue; // Gå tillbaka till början av loopen om input är ogiltig
+                    continue; 
                 }
 
                 Console.Write("Ange kapacitet: ");
@@ -451,7 +439,7 @@ namespace BookingHotell
 
                 var room = new Room
                 {
-                    RoomType = roomType,  // Nu använder vi enum för rumstyp
+                    RoomType = roomType,  
                     Capacity = capacity,
                     PricePerNight = pricePerNight,
                     HasExtraBedOption = hasExtraBedOption
@@ -488,7 +476,7 @@ namespace BookingHotell
             Console.Write($"Nuvarande rumstyp ({room.RoomType}): ");
             string roomTypeInput = Console.ReadLine();
 
-            // Försök att konvertera användarens input till en giltig RoomType enum
+            
             RoomType roomType;
             if (Enum.TryParse(roomTypeInput, true, out roomType) && Enum.IsDefined(typeof(RoomType), roomType))
             {
@@ -497,7 +485,7 @@ namespace BookingHotell
             else
             {
                 Console.WriteLine("Ogiltig rumstyp. Försök igen.");
-                return;  // Avbryt om användaren anger en ogiltig rumstyp
+                return;  
             }
 
             Console.Write($"Nuvarande kapacitet ({room.Capacity}): ");
@@ -587,7 +575,7 @@ namespace BookingHotell
             using var dbContext = new ApplicationDbContext(options);
 
             string firstName;
-            // Validerar förnamn så att det endast innehåller bokstäver
+            
             do
             {
                 Console.Write("Förnamn: ");
@@ -595,7 +583,7 @@ namespace BookingHotell
             } while (string.IsNullOrEmpty(firstName) || !IsValidName(firstName));
 
             string lastName;
-            // Validerar efternamn så att det endast innehåller bokstäver
+           
             do
             {
                 Console.Write("Efternamn: ");
@@ -635,7 +623,7 @@ namespace BookingHotell
             }
         }
 
-        // Hjälpmetod för att validera om ett namn endast innehåller bokstäver
+       
         static bool IsValidName(string name)
         {
             return !string.IsNullOrEmpty(name) && name.All(c => Char.IsLetter(c) || Char.IsWhiteSpace(c));
@@ -659,14 +647,14 @@ namespace BookingHotell
                 return;
             }
 
-            // Förnamn
+            
             string firstName;
             while (true)
             {
                 Console.Write($"Nuvarande förnamn ({customer.FirstName}): ");
                 firstName = Console.ReadLine();
 
-                // Kontrollera att förnamnet inte innehåller siffror
+                
                 if (firstName.Any(char.IsDigit))
                 {
                     Console.WriteLine("Förnamnet kan inte innehålla siffror. Försök igen.");
@@ -681,14 +669,14 @@ namespace BookingHotell
                 }
             }
 
-            // Efternamn
+            
             string lastName;
             while (true)
             {
                 Console.Write($"Nuvarande efternamn ({customer.LastName}): ");
                 lastName = Console.ReadLine();
 
-                // Kontrollera att efternamnet inte innehåller siffror
+               
                 if (lastName.Any(char.IsDigit))
                 {
                     Console.WriteLine("Efternamnet kan inte innehålla siffror. Försök igen.");
@@ -703,7 +691,7 @@ namespace BookingHotell
                 }
             }
 
-            // Telefon och E-post validering kan också läggas till här om du vill
+           
 
             customer.FirstName = firstName;
             customer.LastName = lastName;

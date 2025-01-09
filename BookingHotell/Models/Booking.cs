@@ -10,7 +10,7 @@ namespace BookingHotell.Models
     {
         public int BookingId { get; set; }
         public int RoomId { get; set; }
-        public Room Room { get; set; }  // Navigation property
+        public Room Room { get; set; }  
         public int CustomerId { get; set; }
         public Customer Customer { get; set; }
         public DateTime StartDate { get; set; }

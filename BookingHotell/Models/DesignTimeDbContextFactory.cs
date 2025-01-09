@@ -10,7 +10,7 @@ namespace BookingHotell.Models
         public ApplicationDbContext CreateDbContext(string[] args)
         {
             var builder = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())  // Set the path to your project directory
+                .SetBasePath(Directory.GetCurrentDirectory()) 
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
             var config = builder.Build();

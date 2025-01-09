@@ -25,7 +25,7 @@ namespace BookingHotell.Models
             modelBuilder.Entity<Room>().HasData(
                 new Room
                 {
-                    RoomId = 1,  // Positivt ID
+                    RoomId = 1,  
                     RoomType = RoomType.Single,
                     Capacity = 1,
                     PricePerNight = 500,
@@ -34,7 +34,7 @@ namespace BookingHotell.Models
                 },
                 new Room
                 {
-                    RoomId = 2,  // Positivt ID
+                    RoomId = 2, 
                     RoomType = RoomType.Double,
                     Capacity = 2,
                     PricePerNight = 1000,
@@ -43,7 +43,7 @@ namespace BookingHotell.Models
                 },
                 new Room
                 {
-                    RoomId = 3,  // Positivt ID
+                    RoomId = 3,  
                     RoomType = RoomType.Double,
                     Capacity = 2,
                     PricePerNight = 1200,
@@ -52,7 +52,7 @@ namespace BookingHotell.Models
                 },
                 new Room
                 {
-                    RoomId = 4,  // Positivt ID
+                    RoomId = 4,  
                     RoomType = RoomType.Single,
                     Capacity = 1,
                     PricePerNight = 450,

@@ -8,16 +8,16 @@ namespace BookingHotell.Models
 {
     public enum RoomType
     {
-        Single = 1,  // Enkelrum
-        Double = 2   // Dubbelrum
+        Single = 1,  
+        Double = 2   
     }
 
     public class Room
     {
         public int RoomId { get; set; }
 
-        // Här använder vi enumen istället för en sträng
-        public RoomType RoomType { get; set; }  // Rumstyp: Single eller Double
+       
+        public RoomType RoomType { get; set; }  
 
         public int Capacity { get; set; }
         public decimal PricePerNight { get; set; }
