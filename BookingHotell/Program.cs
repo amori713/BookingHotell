@@ -298,24 +298,21 @@ namespace BookingHotell
                 {
                     Console.WriteLine($"Rum ID: {room.RoomId}, Typ: {room.RoomType}, Kapacitet: {room.Capacity}, Pris per natt: {room.PricePerNight}");
                 }
-                Console.Write("Ange Rummets ID för bokning (skriv t.ex. -2 för rum 2): ");
+
+                Console.Write("Ange Rummets ID för bokning: ");
                 if (!int.TryParse(Console.ReadLine(), out int roomId))
                 {
                     Console.WriteLine("Ogiltigt rum-ID.");
                     return;
                 }
-                if (roomId >= 0)
-                {
-                    Console.WriteLine("Rum-ID måste vara negativt, t.ex. -2 för rum 2.");
-                    return;
-                }
 
-                var roomToBook = dbContext.Rooms.FirstOrDefault(r => r.RoomId == -roomId); // Hitta motsvarande rum med positivt ID
+                var roomToBook = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
                 if (roomToBook == null)
                 {
                     Console.WriteLine("Rummet finns inte.");
                     return;
                 }
+
                 int extraBeds = 0;
                 if (roomToBook.RoomType == RoomType.Double && roomToBook.HasExtraBedOption)
                 {
@@ -354,8 +351,7 @@ namespace BookingHotell
                         Console.WriteLine("Ogiltigt datumformat eller slutdatum är före startdatum. Försök igen.");
                 }
 
-               
-                bool isRoomBooked = dbContext.Bookings.Any(b => b.RoomId == roomToBook.RoomId &&
+                bool isRoomBooked = dbContext.Bookings.Any(b => b.RoomId == roomId &&
                     ((startDate >= b.StartDate && startDate < b.EndDate) ||
                      (endDate > b.StartDate && endDate <= b.EndDate) ||
                      (startDate <= b.StartDate && endDate >= b.EndDate)));
@@ -366,11 +362,10 @@ namespace BookingHotell
                     return;
                 }
 
-               
                 var booking = new Booking
                 {
                     CustomerId = customerId,
-                    RoomId = roomToBook.RoomId,
+                    RoomId = roomId,
                     StartDate = startDate,
                     EndDate = endDate
                 };
@@ -378,13 +373,13 @@ namespace BookingHotell
                 dbContext.Bookings.Add(booking);
                 dbContext.SaveChanges();
                 Console.WriteLine("Bokningen har lagts till!");
-
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Ett fel inträffade: {ex.Message}");
             }
         }
+
 
 
 
@@ -691,7 +686,7 @@ namespace BookingHotell
                 }
             }
 
-           
+            // Telefon och E-post validering kan också läggas till här om du vill
 
             customer.FirstName = firstName;
             customer.LastName = lastName;
