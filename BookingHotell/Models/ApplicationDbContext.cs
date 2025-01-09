@@ -14,29 +14,53 @@ namespace BookingHotell.Models
         public DbSet<Customer> Customers { get; set; }
         public DbSet<Booking> Bookings { get; set; }
         
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
            : base(options)
         {
         }
 
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                optionsBuilder.UseSqlServer(@"Server=.;Database=HotelDB;Trusted_Connection=True;TrustServerCertificate=true;");
-            }
-        }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            
             modelBuilder.Entity<Room>().HasData(
-                new Room { RoomId = -1, RoomType = "Single", Capacity = 1, PricePerNight = 500, HasExtraBedOption = false, ExtraBedsAvailable = 0 },
-                new Room { RoomId = -2, RoomType = "Double", Capacity = 2, PricePerNight = 1000, HasExtraBedOption = true, ExtraBedsAvailable = 2 },
-                new Room { RoomId = -3, RoomType = "Double", Capacity = 2, PricePerNight = 1200, HasExtraBedOption = true, ExtraBedsAvailable = 2 },
-                new Room { RoomId = -4, RoomType = "Single", Capacity = 1, PricePerNight = 450, HasExtraBedOption = false, ExtraBedsAvailable = 0 }
+                new Room
+                {
+                    RoomId = 1,  // Positivt ID
+                    RoomType = RoomType.Single,
+                    Capacity = 1,
+                    PricePerNight = 500,
+                    HasExtraBedOption = false,
+                    ExtraBedsAvailable = 0
+                },
+                new Room
+                {
+                    RoomId = 2,  // Positivt ID
+                    RoomType = RoomType.Double,
+                    Capacity = 2,
+                    PricePerNight = 1000,
+                    HasExtraBedOption = true,
+                    ExtraBedsAvailable = 2
+                },
+                new Room
+                {
+                    RoomId = 3,  // Positivt ID
+                    RoomType = RoomType.Double,
+                    Capacity = 2,
+                    PricePerNight = 1200,
+                    HasExtraBedOption = true,
+                    ExtraBedsAvailable = 2
+                },
+                new Room
+                {
+                    RoomId = 4,  // Positivt ID
+                    RoomType = RoomType.Single,
+                    Capacity = 1,
+                    PricePerNight = 450,
+                    HasExtraBedOption = false,
+                    ExtraBedsAvailable = 0
+                }
             );
 
-            
             modelBuilder.Entity<Customer>().HasData(
                 new Customer { CustomerId = 1, FirstName = "Alice", LastName = "Smith", PhoneNumber = "123456789", Email = "alice@example.com" },
                 new Customer { CustomerId = 2, FirstName = "Bob", LastName = "Johnson", PhoneNumber = "987654321", Email = "bob@example.com" },
@@ -48,4 +72,10 @@ namespace BookingHotell.Models
     }
 
 }
+
+
+
+
+
+
 

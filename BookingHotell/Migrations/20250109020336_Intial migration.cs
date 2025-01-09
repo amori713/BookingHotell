@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace BookingHotell.Migrations
 {
     /// <inheritdoc />
-    public partial class intialmigration : Migration
+    public partial class Intialmigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -35,7 +35,7 @@ namespace BookingHotell.Migrations
                 {
                     RoomId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    RoomType = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    RoomType = table.Column<int>(type: "int", nullable: false),
                     Capacity = table.Column<int>(type: "int", nullable: false),
                     PricePerNight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     HasExtraBedOption = table.Column<bool>(type: "bit", nullable: false),
@@ -52,8 +52,8 @@ namespace BookingHotell.Migrations
                 {
                     BookingId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    CustomerId = table.Column<int>(type: "int", nullable: false),
                     RoomId = table.Column<int>(type: "int", nullable: false),
+                    CustomerId = table.Column<int>(type: "int", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ExtraBeds = table.Column<int>(type: "int", nullable: false)
@@ -91,10 +91,10 @@ namespace BookingHotell.Migrations
                 columns: new[] { "RoomId", "Capacity", "ExtraBedsAvailable", "HasExtraBedOption", "PricePerNight", "RoomType" },
                 values: new object[,]
                 {
-                    { -4, 1, 0, false, 450m, "Single" },
-                    { -3, 2, 2, true, 1200m, "Double" },
-                    { -2, 2, 2, true, 1000m, "Double" },
-                    { -1, 1, 0, false, 500m, "Single" }
+                    { -4, 1, 0, false, 450m, 1 },
+                    { -3, 2, 2, true, 1200m, 2 },
+                    { -2, 2, 2, true, 1000m, 2 },
+                    { -1, 1, 0, false, 500m, 1 }
                 });
 
             migrationBuilder.CreateIndex(

@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BookingHotell.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250106155325_intial migration")]
-    partial class intialmigration
+    [Migration("20250109020357_SeedData")]
+    partial class SeedData
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -140,9 +140,8 @@ namespace BookingHotell.Migrations
                     b.Property<decimal>("PricePerNight")
                         .HasColumnType("decimal(18,2)");
 
-                    b.Property<string>("RoomType")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("RoomType")
+                        .HasColumnType("int");
 
                     b.HasKey("RoomId");
 
@@ -156,7 +155,7 @@ namespace BookingHotell.Migrations
                             ExtraBedsAvailable = 0,
                             HasExtraBedOption = false,
                             PricePerNight = 500m,
-                            RoomType = "Single"
+                            RoomType = 1
                         },
                         new
                         {
@@ -165,7 +164,7 @@ namespace BookingHotell.Migrations
                             ExtraBedsAvailable = 2,
                             HasExtraBedOption = true,
                             PricePerNight = 1000m,
-                            RoomType = "Double"
+                            RoomType = 2
                         },
                         new
                         {
@@ -174,7 +173,7 @@ namespace BookingHotell.Migrations
                             ExtraBedsAvailable = 2,
                             HasExtraBedOption = true,
                             PricePerNight = 1200m,
-                            RoomType = "Double"
+                            RoomType = 2
                         },
                         new
                         {
@@ -183,23 +182,27 @@ namespace BookingHotell.Migrations
                             ExtraBedsAvailable = 0,
                             HasExtraBedOption = false,
                             PricePerNight = 450m,
-                            RoomType = "Single"
+                            RoomType = 1
                         });
                 });
 
             modelBuilder.Entity("BookingHotell.Models.Booking", b =>
                 {
-                    b.HasOne("BookingHotell.Models.Customer", null)
+                    b.HasOne("BookingHotell.Models.Customer", "Customer")
                         .WithMany("Bookings")
                         .HasForeignKey("CustomerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BookingHotell.Models.Room", null)
+                    b.HasOne("BookingHotell.Models.Room", "Room")
                         .WithMany("Bookings")
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Customer");
+
+                    b.Navigation("Room");
                 });
 
             modelBuilder.Entity("BookingHotell.Models.Customer", b =>
