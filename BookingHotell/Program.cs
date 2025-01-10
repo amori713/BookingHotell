@@ -242,6 +242,7 @@ namespace BookingHotell
             }
             Console.WriteLine("\nTryck Enter för att återgå till föregående meny.");
             Console.ReadLine();
+            
         }
         static void ShowBookings(DbContextOptions<ApplicationDbContext> options)
         {
