@@ -526,46 +526,77 @@ namespace BookingHotell
         {
             using var dbContext = new ApplicationDbContext(options);
 
-            Console.Write("Ange bokning ID för att ta bort: ");
-            int bookingId = int.Parse(Console.ReadLine());
-
-            var booking = dbContext.Bookings.FirstOrDefault(b => b.BookingId == bookingId);
-            if (booking == null)
+            while (true)
             {
-                Console.WriteLine("Bokningen finns inte.");
-                return;
+                try
+                {
+                    Console.Write("Ange bokningens ID för att ta bort: ");
+                    if (!int.TryParse(Console.ReadLine(), out int bookingId))
+                    {
+                        Console.WriteLine("Ogiltigt ID. Försök igen.");
+                        continue;
+                    }
+
+                    var booking = dbContext.Bookings.FirstOrDefault(b => b.BookingId == bookingId);
+                    if (booking == null)
+                    {
+                        Console.WriteLine("Bokningen finns inte.");
+                    }
+                    else
+                    {
+                        dbContext.Bookings.Remove(booking);
+                        dbContext.SaveChanges();
+                        Console.WriteLine("Bokningen har tagits bort!");
+                    }
+
+                    Console.WriteLine("\nTryck på Enter för att återgå till huvudmenyn.");
+                    Console.ReadLine();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ett fel uppstod: {ex.Message}");
+                }
             }
-
-            dbContext.Bookings.Remove(booking);
-            dbContext.SaveChanges();
-            Console.WriteLine("Bokningen har tagits bort!");
-            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
-            string choice = Console.ReadLine();
-
         }
 
         static void DeleteCustomer(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
 
-            Console.Write("Ange kund ID för att ta bort: ");
-            int customerId = int.Parse(Console.ReadLine());
-
-            var customer = dbContext.Customers.FirstOrDefault(c => c.CustomerId == customerId);
-            if (customer == null)
+            while (true)
             {
-                Console.WriteLine("Kunden finns inte.");
-                return;
+                try
+                {
+                    Console.Write("Ange kund-ID för att ta bort: ");
+                    if (!int.TryParse(Console.ReadLine(), out int customerId))
+                    {
+                        Console.WriteLine("Ogiltigt ID. Försök igen.");
+                        continue;
+                    }
+
+                    var customer = dbContext.Customers.FirstOrDefault(c => c.CustomerId == customerId);
+                    if (customer == null)
+                    {
+                        Console.WriteLine("Kunden finns inte.");
+                    }
+                    else
+                    {
+                        dbContext.Customers.Remove(customer);
+                        dbContext.SaveChanges();
+                        Console.WriteLine("Kunden har tagits bort!");
+                    }
+
+                    Console.WriteLine("\nTryck på Enter för att återgå till menyn.");
+                    Console.ReadLine();
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Ett fel uppstod: {ex.Message}");
+                }
             }
-
-            dbContext.Customers.Remove(customer);
-            dbContext.SaveChanges();
-            Console.WriteLine("Kunden har tagits bort!");
-            Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
-            string choice = Console.ReadLine();
-
         }
-
         static void RegisterCustomer(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
