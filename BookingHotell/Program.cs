@@ -290,11 +290,12 @@ namespace BookingHotell
 
                 Console.WriteLine("Tillgängliga rum:");
                 var availableRooms = dbContext.Rooms.ToList();
-                if (availableRooms.Count == 0)
+                if (!availableRooms.Any())
                 {
                     Console.WriteLine("Inga tillgängliga rum.");
                     return;
                 }
+
                 foreach (var room in availableRooms)
                 {
                     Console.WriteLine($"Rum ID: {room.RoomId}, Typ: {room.RoomType}, Kapacitet: {room.Capacity}, Pris per natt: {room.PricePerNight}");
@@ -314,44 +315,33 @@ namespace BookingHotell
                     return;
                 }
 
-                int extraBeds = 0;
-                if (roomToBook.RoomType == RoomType.Double && roomToBook.HasExtraBedOption)
-                {
-                    Console.Write("Vill du ha extra sängar? (1 eller 2): ");
-                    if (int.TryParse(Console.ReadLine(), out extraBeds) && (extraBeds == 1 || extraBeds == 2))
-                    {
-                        if (extraBeds > roomToBook.ExtraBedsAvailable)
-                        {
-                            Console.WriteLine($"Rummet har bara {roomToBook.ExtraBedsAvailable} extrasängar tillgängliga.");
-                            return;
-                        }
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ogiltigt antal extra sängar.");
-                        return;
-                    }
-                }
-
-                DateTime startDate, endDate;
+                DateTime startDate;
                 while (true)
                 {
                     Console.Write("Ange Startdatum (yyyy-mm-dd): ");
                     if (DateTime.TryParse(Console.ReadLine(), out startDate))
-                        break;
+                    {
+                        if (startDate >= DateTime.Today)
+                            break;
+                        else
+                            Console.WriteLine("Ogiltigt datum. Startdatum måste vara idag eller ett framtida datum.");
+                    }
                     else
+                    {
                         Console.WriteLine("Ogiltigt datumformat. Försök igen.");
+                    }
                 }
 
+                DateTime endDate;
                 while (true)
                 {
                     Console.Write("Ange Slutdatum (yyyy-mm-dd): ");
                     if (DateTime.TryParse(Console.ReadLine(), out endDate) && endDate > startDate)
                         break;
-                    else
-                        Console.WriteLine("Ogiltigt datumformat eller slutdatum är före startdatum. Försök igen.");
+                    Console.WriteLine("Ogiltigt datumformat eller slutdatum är före startdatum. Försök igen.");
                 }
 
+                // Kontrollera om rummet redan är bokat
                 bool isRoomBooked = dbContext.Bookings.Any(b => b.RoomId == roomId &&
                     ((startDate >= b.StartDate && startDate < b.EndDate) ||
                      (endDate > b.StartDate && endDate <= b.EndDate) ||
@@ -383,7 +373,6 @@ namespace BookingHotell
 
 
 
-
         static void ShowCustomers(DbContextOptions<ApplicationDbContext> options)
         {
             using var dbContext = new ApplicationDbContext(options);
@@ -409,41 +398,79 @@ namespace BookingHotell
         {
             while (true)
             {
-                using var dbContext = new ApplicationDbContext(options);
-
-                Console.Write("Ange rumstyp (Single/Double): ");
-                var roomTypeInput = Console.ReadLine();
-
-                
-                RoomType roomType;
-                if (Enum.TryParse(roomTypeInput, true, out roomType) && Enum.IsDefined(typeof(RoomType), roomType))
+                try
                 {
-                    
+                    using var dbContext = new ApplicationDbContext(options);
+
+                    RoomType roomType;
+                    while (true)
+                    {
+                        Console.Write("Ange rumstyp (Single/Double): ");
+                        var roomTypeInput = Console.ReadLine();
+                        if (Enum.TryParse(typeof(RoomType), roomTypeInput, true, out var parsedType) && Enum.IsDefined(typeof(RoomType), parsedType))
+                        {
+                            roomType = (RoomType)parsedType;
+                            break;
+                        }
+                        Console.WriteLine("Ogiltig rumstyp. Ange 'Single' eller 'Double'. Försök igen.");
+                    }
+
+                    int capacity;
+                    while (true)
+                    {
+                        Console.Write("Ange kapacitet: ");
+                        if (int.TryParse(Console.ReadLine(), out capacity) && capacity > 0)
+                            break;
+                        Console.WriteLine("Ogiltig kapacitet. Ange ett positivt heltal.");
+                    }
+
+                    decimal pricePerNight;
+                    while (true)
+                    {
+                        Console.Write("Ange pris per natt: ");
+                        if (decimal.TryParse(Console.ReadLine(), out pricePerNight) && pricePerNight > 0)
+                            break;
+                        Console.WriteLine("Ogiltigt pris. Ange ett positivt värde.");
+                    }
+
+                    bool hasExtraBedOption;
+                    while (true)
+                    {
+                        Console.Write("Har rummet extrasängar? (ja/nej): ");
+                        var extraBedInput = Console.ReadLine()?.ToLower();
+                        if (extraBedInput == "ja")
+                        {
+                            hasExtraBedOption = true;
+                            break;
+                        }
+                        else if (extraBedInput == "nej")
+                        {
+                            hasExtraBedOption = false;
+                            break;
+                        }
+                        Console.WriteLine("Ogiltigt svar. Ange 'ja' eller 'nej'.");
+                    }
+
+                    var room = new Room
+                    {
+                        RoomType = roomType,
+                        Capacity = capacity,
+                        PricePerNight = pricePerNight,
+                        HasExtraBedOption = hasExtraBedOption
+                    };
+
+                    dbContext.Rooms.Add(room);
+                    dbContext.SaveChanges();
+                    Console.WriteLine("Rummet har registrerats!");
                 }
-                else
+                catch (Exception ex)
                 {
-                    Console.WriteLine("Ogiltig rumstyp. Försök igen.");
-                    continue; 
+                    Console.WriteLine($"Ett fel inträffade: {ex.Message}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"Inre undantag: {ex.InnerException.Message}");
+                    }
                 }
-
-                Console.Write("Ange kapacitet: ");
-                int capacity = int.Parse(Console.ReadLine());
-                Console.Write("Ange pris per natt: ");
-                decimal pricePerNight = decimal.Parse(Console.ReadLine());
-                Console.Write("Har rummet extrasängar? (ja/nej): ");
-                bool hasExtraBedOption = Console.ReadLine().ToLower() == "ja";
-
-                var room = new Room
-                {
-                    RoomType = roomType,  
-                    Capacity = capacity,
-                    PricePerNight = pricePerNight,
-                    HasExtraBedOption = hasExtraBedOption
-                };
-
-                dbContext.Rooms.Add(room);
-                dbContext.SaveChanges();
-                Console.WriteLine("Rummet har registrerats!");
 
                 Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
                 string choice = Console.ReadLine();
@@ -453,7 +480,6 @@ namespace BookingHotell
                 }
             }
         }
-
 
         static void EditRoom(DbContextOptions<ApplicationDbContext> options)
         {
