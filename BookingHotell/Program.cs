@@ -318,27 +318,19 @@ namespace BookingHotell
                 DateTime startDate;
                 while (true)
                 {
-                    Console.Write("Ange Startdatum (yyyy-mm-dd): ");
-                    if (DateTime.TryParse(Console.ReadLine(), out startDate))
-                    {
-                        if (startDate >= DateTime.Today)
-                            break;
-                        else
-                            Console.WriteLine("Ogiltigt datum. Startdatum måste vara idag eller ett framtida datum.");
-                    }
-                    else
-                    {
-                        Console.WriteLine("Ogiltigt datumformat. Försök igen.");
-                    }
+                    Console.Write("Startdatum (yyyy-mm-dd): ");
+                    if (DateTime.TryParse(Console.ReadLine(), out startDate) && startDate >= DateTime.Today)
+                        break;
+                    Console.WriteLine("Ogiltigt datum. Startdatum måste vara idag eller ett framtida datum.");
                 }
 
                 DateTime endDate;
                 while (true)
                 {
-                    Console.Write("Ange Slutdatum (yyyy-mm-dd): ");
+                    Console.Write("Slutdatum (yyyy-mm-dd): ");
                     if (DateTime.TryParse(Console.ReadLine(), out endDate) && endDate > startDate)
                         break;
-                    Console.WriteLine("Ogiltigt datumformat eller slutdatum är före startdatum. Försök igen.");
+                    Console.WriteLine("Ogiltigt datum. Slutdatum måste vara efter startdatum.");
                 }
 
                 // Kontrollera om rummet redan är bokat
@@ -349,7 +341,7 @@ namespace BookingHotell
 
                 if (isRoomBooked)
                 {
-                    Console.WriteLine("Rummet är redan bokat under den valda perioden.");
+                    Console.WriteLine("Rummet är redan bokat under de valda datumen.");
                     return;
                 }
 
@@ -370,7 +362,6 @@ namespace BookingHotell
                 Console.WriteLine($"Ett fel inträffade: {ex.Message}");
             }
         }
-
 
 
         static void ShowCustomers(DbContextOptions<ApplicationDbContext> options)
