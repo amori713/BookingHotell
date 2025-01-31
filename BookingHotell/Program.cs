@@ -474,70 +474,100 @@ namespace BookingHotell
 
         static void EditRoom(DbContextOptions<ApplicationDbContext> options)
         {
-            using var dbContext = new ApplicationDbContext(options);
-
-            Console.Write("Ange rum ID för att ändra: ");
-            int roomId = int.Parse(Console.ReadLine());
-
-            var room = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
-            if (room == null)
+            try
             {
-                Console.WriteLine("Rummet finns inte.");
-                return;
-            }
+                using var dbContext = new ApplicationDbContext(options);
 
-            Console.Write($"Nuvarande rumstyp ({room.RoomType}): ");
-            string roomTypeInput = Console.ReadLine();
+                Console.Write("Ange rum ID för att ändra: ");
+                if (!int.TryParse(Console.ReadLine(), out int roomId))
+                {
+                    Console.WriteLine("Ogiltigt ID. Ange ett giltigt nummer.");
+                    return;
+                }
 
-            
-            RoomType roomType;
-            if (Enum.TryParse(roomTypeInput, true, out roomType) && Enum.IsDefined(typeof(RoomType), roomType))
-            {
+                var room = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
+                if (room == null)
+                {
+                    Console.WriteLine("Rummet finns inte.");
+                    return;
+                }
+
+                Console.Write($"Nuvarande rumstyp ({room.RoomType}): ");
+                string roomTypeInput = Console.ReadLine();
+
+                if (!Enum.TryParse(roomTypeInput, true, out RoomType roomType) || !Enum.IsDefined(typeof(RoomType), roomType))
+                {
+                    Console.WriteLine("Ogiltig rumstyp. Försök igen.");
+                    return;
+                }
                 room.RoomType = roomType;
+
+                Console.Write($"Nuvarande kapacitet ({room.Capacity}): ");
+                if (!int.TryParse(Console.ReadLine(), out int capacity))
+                {
+                    Console.WriteLine("Ogiltigt värde. Ange ett heltal.");
+                    return;
+                }
+                room.Capacity = capacity;
+
+                Console.Write($"Nuvarande pris per natt ({room.PricePerNight}): ");
+                if (!decimal.TryParse(Console.ReadLine(), out decimal pricePerNight))
+                {
+                    Console.WriteLine("Ogiltigt värde. Ange ett korrekt pris.");
+                    return;
+                }
+                room.PricePerNight = pricePerNight;
+
+                Console.Write($"Har rummet extrasängar? ({(room.HasExtraBedOption ? "ja" : "nej")}): ");
+                string extraBedInput = Console.ReadLine().ToLower();
+                room.HasExtraBedOption = extraBedInput == "ja";
+
+                dbContext.SaveChanges();
+                Console.WriteLine("Rummet har uppdaterats!");
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Ogiltig rumstyp. Försök igen.");
-                return;  
+                Console.WriteLine($"Ett fel inträffade: {ex.Message}");
             }
 
-            Console.Write($"Nuvarande kapacitet ({room.Capacity}): ");
-            room.Capacity = int.Parse(Console.ReadLine());
-
-            Console.Write($"Nuvarande pris per natt ({room.PricePerNight}): ");
-            room.PricePerNight = decimal.Parse(Console.ReadLine());
-
-            Console.Write($"Har rummet extrasängar? ({(room.HasExtraBedOption ? "ja" : "nej")}): ");
-            room.HasExtraBedOption = Console.ReadLine().ToLower() == "ja";
-
-            dbContext.SaveChanges();
-            Console.WriteLine("Rummet har uppdaterats!");
             Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
-            string choice = Console.ReadLine();
+            Console.ReadLine();
         }
 
 
         static void DeleteRoom(DbContextOptions<ApplicationDbContext> options)
         {
-            using var dbContext = new ApplicationDbContext(options);
-
-            Console.Write("Ange rum ID för att ta bort: ");
-            int roomId = int.Parse(Console.ReadLine());
-
-            var room = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
-            if (room == null)
+            try
             {
-                Console.WriteLine("Rummet finns inte.");
-                return;
+                using var dbContext = new ApplicationDbContext(options);
+
+                Console.Write("Ange rum ID för att ta bort: ");
+                if (!int.TryParse(Console.ReadLine(), out int roomId))
+                {
+                    Console.WriteLine("Ogiltigt ID. Ange ett giltigt nummer.");
+                    return;
+                }
+
+                var room = dbContext.Rooms.FirstOrDefault(r => r.RoomId == roomId);
+                if (room == null)
+                {
+                    Console.WriteLine("Rummet finns inte.");
+                    return;
+                }
+
+                dbContext.Rooms.Remove(room);
+                dbContext.SaveChanges();
+                Console.WriteLine("Rummet har tagits bort!");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Ett fel inträffade: {ex.Message}");
             }
 
-            dbContext.Rooms.Remove(room);
-            dbContext.SaveChanges();
-            Console.WriteLine("Rummet har tagits bort!");
             Console.WriteLine("\nSkriv 'M' för att återgå till huvudmenyn.");
-            string choice = Console.ReadLine();
-
+            Console.ReadLine();
         }
+
 
         static void DeleteBooking(DbContextOptions<ApplicationDbContext> options)
         {
